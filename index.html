@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mis 5 Tareas del Día</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+
+        .date {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 0.95em;
+        }
+
+        .progress-container {
+            background: #f0f0f0;
+            border-radius: 10px;
+            height: 12px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .tasks-list {
+            list-style: none;
+        }
+
+        .task-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 18px;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        .task-item:hover {
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .task-item.completed {
+            background: #e8f5e9;
+            opacity: 0.7;
+        }
+
+        .task-number {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            flex-shrink: 0;
+        }
+
+        .task-item.completed .task-number {
+            background: #4caf50;
+        }
+
+        .task-content {
+            flex-grow: 1;
+        }
+
+        .task-input {
+            width: 100%;
+            border: none;
+            background: transparent;
+            font-size: 16px;
+            color: #333;
+            outline: none;
+            font-family: inherit;
+        }
+
+        .task-input::placeholder {
+            color: #999;
+        }
+
+        .task-item.completed .task-input {
+            text-decoration: line-through;
+            color: #666;
+        }
+
+        .task-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            justify-content: center;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+        }
+
+        .btn-secondary:hover {
+            box-shadow: 0 5px 15px rgba(108, 117, 125, 0.4);
+        }
+
+        .motivational {
+            text-align: center;
+            margin-top: 20px;
+            font-style: italic;
+            color: #667eea;
+            font-weight: 500;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎯 Mis 5 Tareas del Día</h1>
+        <div class="date" id="dateDisplay"></div>
+        
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar"></div>
+        </div>
+        <div class="progress-text" id="progressText">0 de 5 completadas</div>
+
+        <ul class="tasks-list" id="tasksList">
+            <!-- Las tareas se generan dinámicamente -->
+        </ul>
+
+        <div class="action-buttons">
+            <button class="btn" onclick="saveTasks()">💾 Guardar</button>
+            <button class="btn btn-secondary" onclick="resetTasks()">🔄 Reiniciar</button>
+        </div>
+
+        <div class="motivational" id="motivationalText"></div>
+    </div>
+
+    <script>
+        const motivationalMessages = [
+            "¡Vamos que vos podés! 💪",
+            "Un paso a la vez, che 🚀",
+            "Dale que es sábado de productividad! ⭐",
+            "Cada tarea completada es una victoria 🏆",
+            "¡Estás haciendo un gran trabajo! 🌟"
+        ];
+
+        function initApp() {
+            // Mostrar fecha actual
+            const today = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            document.getElementById('dateDisplay').textContent = today.toLocaleDateString('es-AR', options);
+
+            // Cargar tareas guardadas o crear nuevas
+            loadTasks();
+            
+            // Mostrar mensaje motivacional
+            updateMotivationalMessage();
+        }
+
+        function loadTasks() {
+            const savedTasks = localStorage.getItem('dailyTasks');
+            const savedDate = localStorage.getItem('tasksDate');
+            const today = new Date().toDateString();
+
+            let tasks;
+            
+            // Si es un nuevo día, resetear las tareas
+            if (savedDate !== today || !savedTasks) {
+                tasks = [
+                    { id: 1, text: '', completed: false },
+                    { id: 2, text: '', completed: false },
+                    { id: 3, text: '', completed: false },
+                    { id: 4, text: '', completed: false },
+                    { id: 5, text: '', completed: false }
+                ];
+                localStorage.setItem('tasksDate', today);
+            } else {
+                tasks = JSON.parse(savedTasks);
+            }
+
+            renderTasks(tasks);
+            updateProgress();
+        }
+
+        function renderTasks(tasks) {
+            const tasksList = document.getElementById('tasksList');
+            tasksList.innerHTML = '';
+
+            tasks.forEach(task => {
+                const li = document.createElement('li');
+                li.className = `task-item ${task.completed ? 'completed' : ''}`;
+                li.innerHTML = `
+                    <div class="task-number">${task.id}</div>
+                    <div class="task-content">
+                        <input 
+                            type="text" 
+                            class="task-input" 
+                            placeholder="Escribí tu tarea aquí..."
+                            value="${task.text}"
+                            onchange="updateTaskText(${task.id}, this.value)"
+                        >
+                    </div>
+                    <input 
+                        type="checkbox" 
+                        class="task-checkbox"
+                        ${task.completed ? 'checked' : ''}
+                        onchange="toggleTask(${task.id})"
+                    >
+                `;
+                tasksList.appendChild(li);
+            });
+        }
+
+        function getTasks() {
+            const savedTasks = localStorage.getItem('dailyTasks');
+            return savedTasks ? JSON.parse(savedTasks) : [];
+        }
+
+        function updateTaskText(id, text) {
+            const tasks = getTasks();
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.text = text;
+                localStorage.setItem('dailyTasks', JSON.stringify(tasks));
+            }
+        }
+
+        function toggleTask(id) {
+            const tasks = getTasks();
+            const task = tasks.find(t => t.id === id);
+            if (task) {
+                task.completed = !task.completed;
+                localStorage.setItem('dailyTasks', JSON.stringify(tasks));
+                renderTasks(tasks);
+                updateProgress();
+                updateMotivationalMessage();
+            }
+        }
+
+        function updateProgress() {
+            const tasks = getTasks();
+            const completed = tasks.filter(t => t.completed).length;
+            const percentage = (completed / 5) * 100;
+
+            document.getElementById('progressBar').style.width = percentage + '%';
+            document.getElementById('progressText').textContent = `${completed} de 5 completadas`;
+
+            // Celebrar cuando se completan todas
+            if (completed === 5) {
+                setTimeout(() => {
+                    alert('🎉 ¡Felicitaciones! ¡Completaste todas las tareas del día! ¡Sos un crack!');
+                }, 300);
+            }
+        }
+
+        function updateMotivationalMessage() {
+            const tasks = getTasks();
+            const completed = tasks.filter(t => t.completed).length;
+            const message = motivationalMessages[completed] || motivationalMessages[0];
+            document.getElementById('motivationalText').textContent = message;
+        }
+
+        function saveTasks() {
+            alert('✅ Tareas guardadas correctamente');
+        }
+
+        function resetTasks() {
+            if (confirm('¿Estás seguro que querés reiniciar todas las tareas?')) {
+                const tasks = [
+                    { id: 1, text: '', completed: false },
+                    { id: 2, text: '', completed: false },
+                    { id: 3, text: '', completed: false },
+                    { id: 4, text: '', completed: false },
+                    { id: 5, text: '', completed: false }
+                ];
+                localStorage.setItem('dailyTasks', JSON.stringify(tasks));
+                renderTasks(tasks);
+                updateProgress();
+                updateMotivationalMessage();
+            }
+        }
+
+        // Inicializar la app cuando carga la página
+        window.onload = initApp;
+    </script>
+</body>
+</html>
